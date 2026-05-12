@@ -6,6 +6,7 @@ dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
@@ -27,8 +28,17 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/challenges', challengeRoutes);
 
+// Test Route
 app.get('/', (req, res) => {
   res.send('Backend jalan');
 });
+
+// Listen Server
+const PORT = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 export default app;
