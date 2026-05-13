@@ -63,6 +63,17 @@ const manualTransactionSchema = z.object({
   }),
 });
 
+const bulkTransactionSchema = z.object({
+  body: z.object({
+    transactions: z.array(z.object({
+      tanggal: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD'),
+      kategori: z.string().min(1, 'Kategori wajib diisi'),
+      jumlah: z.number().positive('Jumlah harus lebih dari 0'),
+      deskripsi: z.string().min(1, 'Deskripsi wajib diisi'),
+    })).min(1, 'Minimal satu transaksi harus disertakan'),
+  }),
+});
+
 // POST /api/transactions
 router.post('/', authenticateJWT, validate(manualTransactionSchema), async (req: Request, res: Response) => {
   try {
@@ -85,6 +96,33 @@ router.post('/', authenticateJWT, validate(manualTransactionSchema), async (req:
     });
   } catch (error) {
     console.error('Insert manual transaction error:', error);
+    return res.status(500).json({ status: 'error', message: 'Terjadi kesalahan server' });
+  }
+});
+
+// POST /api/transactions/bulk
+router.post('/bulk', authenticateJWT, validate(bulkTransactionSchema), async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { transactions } = req.body;
+    
+    // Map transactions to match insertBulkTransactions interface
+    const rows = transactions.map((t: any) => ({
+      tanggal: t.tanggal,
+      kategoriNama: t.kategori,
+      jumlah: t.jumlah,
+      deskripsi: t.deskripsi
+    }));
+
+    const insertedCount = await insertBulkTransactions(userId, rows);
+
+    return res.status(201).json({
+      status: 'success',
+      message: `Berhasil menambahkan ${insertedCount} transaksi`,
+      data: { insertedCount }
+    });
+  } catch (error) {
+    console.error('Insert bulk transaction error:', error);
     return res.status(500).json({ status: 'error', message: 'Terjadi kesalahan server' });
   }
 });
