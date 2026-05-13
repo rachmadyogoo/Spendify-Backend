@@ -154,20 +154,26 @@ export async function generateMonthlyWrapped(userId: string, month: string, year
 
 export async function analyzeReceipt(base64Image: string) {
   const prompt = `
-    Kamu adalah asisten pengolah struk belanja. 
-    Analisis gambar struk yang diberikan dan ekstrak informasi berikut dalam format JSON:
-    {
-      "tanggal": "YYYY-MM-DD",
-      "kategori": "Kategori barang (misal: Makan, Jajan, Transportasi, Belanja Bulanan, Hiburan, Kesehatan)",
-      "jumlah": harga barang yang dibayar,
-      "deskripsi": "Deskripsi singkat barang yang dibeli (1-2 kata)"
-    }
+    Kamu adalah asisten pengolah struk belanja profesional. 
+    Analisis gambar struk yang diberikan dan ekstrak SEMUA item pengeluaran yang tertera di struk tersebut dalam format JSON.
+    
+    Format JSON harus berupa ARRAY of OBJECTS seperti ini:
+    [
+      {
+        "tanggal": "YYYY-MM-DD",
+        "kategori": "Kategori barang (pilih yang paling relevan: Makan, Jajan, Transportasi, Belanja Bulanan, Hiburan, Kesehatan, Kebutuhan Rumah, Lainnya)",
+        "jumlah": harga per item (number),
+        "deskripsi": "Nama barang/deskripsi singkat (maks 3 kata)"
+      },
+      ...
+    ]
 
     PENTING:
-    - Jika tanggal tidak ditemukan, gunakan tanggal hari ini.
+    - Jika tanggal tidak ditemukan di struk, gunakan tanggal hari ini.
     - Pastikan "jumlah" adalah angka murni (number).
-    - Berikan "kategori" yang paling relevan.
-    - Hanya kembalikan JSON, jangan ada teks lain.
+    - Ekstrak SEMUA item belanja yang ada di struk satu per satu.
+    - Jika ada diskon atau pajak, abaikan sebagai item terpisah, tapi pastikan harga item adalah harga final setelah diskon jika memungkinkan, atau harga satuan.
+    - Hanya kembalikan JSON array, jangan ada teks penjelasan lain.
   `;
 
   // Deteksi mimeType dari prefix data URI
@@ -253,4 +259,3 @@ export async function getOrGenerateChallenges(userId: string, targetMonth?: numb
 
   return savedChallenges;
 }
-
