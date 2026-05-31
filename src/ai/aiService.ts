@@ -26,10 +26,6 @@ export async function generateMonthlyWrapped(userId: string, month: string, year
   const targetMonth = parseInt(month);
   const targetYear = parseInt(year);
 
-  if (targetYear > currentYear || (targetYear === currentYear && targetMonth >= currentMonth)) {
-    throw new Error('Wrapped bulan ini belum tersedia. Tunggu sampai bulan berakhir!');
-  }
-
   // 1. Total Pengeluaran Bulan Ini
   const totalRes = await pool.query(
     `SELECT SUM(jumlah) as total FROM pengeluaran 
