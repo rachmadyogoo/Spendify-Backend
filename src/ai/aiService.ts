@@ -21,7 +21,7 @@ export async function generateMonthlyWrapped(userId: string, month: string, year
   if (!user) throw new Error('User tidak ditemukan');
 
   const now = new Date();
-  const currentMonth = now.getMonth() + 1;
+  const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
   const targetMonth = parseInt(month);
   const targetYear = parseInt(year);
